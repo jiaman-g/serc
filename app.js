@@ -25,6 +25,15 @@ const resetBtn = document.getElementById("resetBtn");
 const listEl = document.getElementById("list");
 const countEl = document.getElementById("count");
 const regionSummaryEl = document.getElementById("regionSummary");
+const radiusStatsEl = document.getElementById("radiusStats");
+const employerAddressEl = document.getElementById("employerAddress");
+
+const employerLocation = {
+  name: "로그인 사업장",
+  address: "서울특별시 강남구 테헤란로",
+  lat: 37.4981,
+  lng: 127.0276
+};
 
 const map = L.map("map", { zoomControl: true }).setView([36.45, 127.9], 7);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -33,6 +42,8 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 }).addTo(map);
 
 const circleLayerGroup = L.layerGroup().addTo(map);
+const radiusLayerGroup = L.layerGroup().addTo(map);
+let employerMarker = null;
 
 function formatAddressArea(person) {
   if (person.district.endsWith("시") && person.dong) {
@@ -40,6 +51,109 @@ function formatAddressArea(person) {
   }
 
   return person.district;
+}
+
+function toRadians(value) {
+  return (value * Math.PI) / 180;
+}
+
+function getDistanceKm(fromLat, fromLng, toLat, toLng) {
+  const earthRadiusKm = 6371;
+  const dLat = toRadians(toLat - fromLat);
+  const dLng = toRadians(toLng - fromLng);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(fromLat)) * Math.cos(toRadians(toLat)) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return earthRadiusKm * c;
+}
+
+function buildRadiusStats(items, stepKm = 5) {
+  if (!items.length) {
+    return [];
+  }
+
+  const maxDistance = Math.max(
+    ...items.map((person) => getDistanceKm(employerLocation.lat, employerLocation.lng, person.lat, person.lng))
+  );
+  const bandCount = Math.max(1, Math.ceil(maxDistance / stepKm));
+  const bands = Array.from({ length: bandCount }, (_, index) => ({
+    startKm: index * stepKm,
+    endKm: (index + 1) * stepKm,
+    count: 0
+  }));
+
+  items.forEach((person) => {
+    const distance = getDistanceKm(employerLocation.lat, employerLocation.lng, person.lat, person.lng);
+    const bandIndex = Math.min(Math.floor(distance / stepKm), bands.length - 1);
+    bands[bandIndex].count += 1;
+  });
+
+  return bands;
+}
+
+function renderRadiusStats(items) {
+  const bands = buildRadiusStats(items, 5);
+
+  if (!bands.length) {
+    radiusStatsEl.innerHTML = '<p class="radius-empty">반경 통계를 계산할 구직자가 없습니다.</p>';
+    return;
+  }
+
+  radiusStatsEl.innerHTML = bands
+    .map((band) => `
+      <article class="radius-chip">
+        <p class="radius-range">${band.startKm}~${band.endKm}km</p>
+        <p class="radius-count">${band.count}명</p>
+      </article>
+    `)
+    .join("");
+}
+
+function renderEmployerRadius(items) {
+  radiusLayerGroup.clearLayers();
+
+  const bands = buildRadiusStats(items, 5);
+  const ringCount = Math.max(1, bands.length);
+
+  for (let index = 0; index < ringCount; index += 1) {
+    const ringKm = (index + 1) * 5;
+    const ring = L.circle([employerLocation.lat, employerLocation.lng], {
+      radius: ringKm * 1000,
+      color: "#da8b2f",
+      fill: false,
+      weight: 1.5,
+      dashArray: "6 6"
+    });
+    ring.bindTooltip(`${ringKm}km`, {
+      permanent: true,
+      direction: "right",
+      offset: [12, 0],
+      className: "radius-ring-label"
+    });
+    ring.addTo(radiusLayerGroup);
+  }
+
+  if (!employerMarker) {
+    employerMarker = L.marker([employerLocation.lat, employerLocation.lng], {
+      icon: L.divIcon({
+        className: "employer-pin-wrapper",
+        html: '<div class="employer-pin">사업장</div>',
+        iconSize: [56, 30],
+        iconAnchor: [28, 15]
+      })
+    });
+  }
+
+  employerMarker
+    .bindPopup(`
+      <div class="map-popup">
+        <h4>${employerLocation.name}</h4>
+        <p>${employerLocation.address}</p>
+      </div>
+    `)
+    .addTo(radiusLayerGroup);
 }
 
 function filterJobseekers() {
@@ -122,7 +236,7 @@ function renderMap(items) {
 
   regionSummaryEl.textContent = `상위 밀집 지역: ${summary}`;
 
-  const bounds = [];
+  const bounds = [[employerLocation.lat, employerLocation.lng]];
 
   grouped.forEach((group) => {
     const count = group.members.length;
@@ -176,7 +290,10 @@ function refresh() {
   const filtered = filterJobseekers();
   renderList(filtered);
   renderMap(filtered);
+  renderRadiusStats(filtered);
+  renderEmployerRadius(filtered);
   countEl.textContent = String(filtered.length);
+  employerAddressEl.textContent = employerLocation.address;
 }
 
 [keywordEl, jobEl, experienceEl, educationEl, regionEl].forEach((el) => {
