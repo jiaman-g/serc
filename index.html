@@ -1,0 +1,91 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>고용24 인재검색</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <p class="hero-badge">고용24 사업장</p>
+      <h1>인재검색</h1>
+      <p class="hero-text">목록으로 상세 정보를 확인하고, 지도에서 지역별 구직자 분포를 직관적으로 파악할 수 있습니다.</p>
+    </header>
+
+    <section class="filters" aria-label="인재검색 필터">
+      <div class="field-wrap">
+        <label for="keyword">키워드</label>
+        <input id="keyword" type="text" placeholder="이름 또는 기술 키워드" />
+      </div>
+      <div class="field-wrap">
+        <label for="job">희망 직무</label>
+        <select id="job">
+          <option value="">전체</option>
+          <option value="웹개발">웹개발</option>
+          <option value="백엔드">백엔드</option>
+          <option value="프론트엔드">프론트엔드</option>
+          <option value="데이터분석">데이터분석</option>
+          <option value="디자인">디자인</option>
+        </select>
+      </div>
+      <div class="field-wrap">
+        <label for="experience">경력</label>
+        <select id="experience">
+          <option value="">전체</option>
+          <option value="신입">신입</option>
+          <option value="1-3년">1-3년</option>
+          <option value="4-7년">4-7년</option>
+          <option value="8년+">8년+</option>
+        </select>
+      </div>
+      <div class="field-wrap">
+        <label for="education">학력</label>
+        <select id="education">
+          <option value="">전체</option>
+          <option value="고졸">고졸</option>
+          <option value="전문학사">전문학사</option>
+          <option value="학사">학사</option>
+          <option value="석사 이상">석사 이상</option>
+        </select>
+      </div>
+      <div class="field-wrap">
+        <label for="region">지역</label>
+        <select id="region">
+          <option value="">전체</option>
+          <option value="서울">서울</option>
+          <option value="경기">경기</option>
+          <option value="인천">인천</option>
+          <option value="대전">대전</option>
+          <option value="대구">대구</option>
+          <option value="부산">부산</option>
+          <option value="광주">광주</option>
+        </select>
+      </div>
+      <button id="resetBtn" type="button">초기화</button>
+    </section>
+
+    <section class="summary">
+      <p>검색 결과 <strong id="count">0</strong>명</p>
+      <p id="regionSummary" class="region-summary">지역 분포를 계산 중입니다.</p>
+    </section>
+
+    <main class="layout">
+      <section class="list-panel" aria-label="구직자 목록">
+        <div id="list" class="card-list"></div>
+      </section>
+      <section class="map-panel" aria-label="구직자 위치 지도">
+        <div id="map"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>
