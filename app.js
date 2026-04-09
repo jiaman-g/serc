@@ -27,6 +27,7 @@ const countEl = document.getElementById("count");
 const regionSummaryEl = document.getElementById("regionSummary");
 const radiusStatsEl = document.getElementById("radiusStats");
 const employerAddressEl = document.getElementById("employerAddress");
+const outerStatsEl = document.getElementById("outerStats");
 
 const employerLocation = {
   name: "로그인 사업장",
@@ -70,14 +71,7 @@ function getDistanceKm(fromLat, fromLng, toLat, toLng) {
 }
 
 function buildRadiusStats(items, stepKm = 5) {
-  if (!items.length) {
-    return [];
-  }
-
-  const maxDistance = Math.max(
-    ...items.map((person) => getDistanceKm(employerLocation.lat, employerLocation.lng, person.lat, person.lng))
-  );
-  const bandCount = Math.max(1, Math.ceil(maxDistance / stepKm));
+  const bandCount = 6;
   const bands = Array.from({ length: bandCount }, (_, index) => ({
     startKm: index * stepKm,
     endKm: (index + 1) * stepKm,
@@ -86,21 +80,48 @@ function buildRadiusStats(items, stepKm = 5) {
 
   items.forEach((person) => {
     const distance = getDistanceKm(employerLocation.lat, employerLocation.lng, person.lat, person.lng);
-    const bandIndex = Math.min(Math.floor(distance / stepKm), bands.length - 1);
-    bands[bandIndex].count += 1;
+    if (distance <= 30) {
+      const bandIndex = Math.min(Math.floor(distance / stepKm), bands.length - 1);
+      bands[bandIndex].count += 1;
+    }
   });
 
   return bands;
 }
 
-function renderRadiusStats(items) {
-  const bands = buildRadiusStats(items, 5);
-
-  if (!bands.length) {
-    radiusStatsEl.innerHTML = '<p class="radius-empty">반경 통계를 계산할 구직자가 없습니다.</p>';
-    return;
+function formatOuterAddress(person) {
+  const metroRegions = ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종"];
+  if (metroRegions.some((name) => person.region.includes(name))) {
+    return `${person.region} ${person.district}`;
   }
 
+  if (person.district.endsWith("시") && person.dong) {
+    return `${person.region} ${person.district} ${person.dong}`;
+  }
+
+  return `${person.region} ${person.district}`;
+}
+
+function buildOuterStats(items) {
+  const grouped = new Map();
+
+  items.forEach((person) => {
+    const distance = getDistanceKm(employerLocation.lat, employerLocation.lng, person.lat, person.lng);
+    if (distance <= 30) {
+      return;
+    }
+
+    const area = formatOuterAddress(person);
+    grouped.set(area, (grouped.get(area) || 0) + 1);
+  });
+
+  return Array.from(grouped.entries())
+    .map(([area, count]) => ({ area, count }))
+    .sort((a, b) => b.count - a.count || a.area.localeCompare(b.area, "ko"));
+}
+
+function renderRadiusStats(items) {
+  const bands = buildRadiusStats(items, 5);
   radiusStatsEl.innerHTML = bands
     .map((band) => `
       <article class="radius-chip">
@@ -111,12 +132,27 @@ function renderRadiusStats(items) {
     .join("");
 }
 
+function renderOuterStats(items) {
+  const outer = buildOuterStats(items);
+
+  if (!outer.length) {
+    outerStatsEl.innerHTML = '<p class="radius-empty">30km 초과 구직자가 없습니다.</p>';
+    return;
+  }
+
+  outerStatsEl.innerHTML = outer
+    .map((item) => `
+      <article class="outer-row">
+        <p class="outer-area">${item.area}</p>
+        <p class="outer-count">${item.count}명</p>
+      </article>
+    `)
+    .join("");
+}
+
 function renderEmployerRadius(items) {
   radiusLayerGroup.clearLayers();
-
-  const bands = buildRadiusStats(items, 5);
-  const ringCount = Math.max(1, bands.length);
-
+  const ringCount = 6;
   for (let index = 0; index < ringCount; index += 1) {
     const ringKm = (index + 1) * 5;
     const ring = L.circle([employerLocation.lat, employerLocation.lng], {
@@ -291,6 +327,7 @@ function refresh() {
   renderList(filtered);
   renderMap(filtered);
   renderRadiusStats(filtered);
+  renderOuterStats(filtered);
   renderEmployerRadius(filtered);
   countEl.textContent = String(filtered.length);
   employerAddressEl.textContent = employerLocation.address;

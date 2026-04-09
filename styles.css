@@ -183,6 +183,37 @@ button:hover {
   font-size: 0.9rem;
 }
 
+.outer-title {
+  margin-top: 14px;
+}
+
+.outer-stats {
+  display: grid;
+  gap: 8px;
+}
+
+.outer-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid #d6e0d4;
+  background: #fdfefe;
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.outer-area {
+  margin: 0;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.outer-count {
+  margin: 0;
+  color: var(--primary-deep);
+  font-weight: 800;
+}
+
 .region-summary {
   color: var(--muted);
   font-size: 0.92rem;
