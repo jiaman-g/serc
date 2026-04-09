@@ -12,7 +12,7 @@
   { name: "노서연", job: "프론트엔드", experience: "1-3년", education: "학사", region: "부산", district: "부산진구", lat: 35.1628, lng: 129.0532, skills: ["React", "Next.js", "Sass"] },
   { name: "임가은", job: "디자인", experience: "신입", education: "전문학사", region: "광주", district: "북구", lat: 35.174, lng: 126.9111, skills: ["Illustrator", "Photoshop", "Figma"] },
   { name: "권시우", job: "백엔드", experience: "4-7년", education: "학사", region: "서울", district: "송파구", lat: 37.5145, lng: 127.1059, skills: ["Python", "Django", "Docker"] },
-  { name: "서지민", job: "데이터분석", experience: "8년+", education: "석사 이상", region: "경기", district: "일산동구", lat: 37.6584, lng: 126.7789, skills: ["ML", "Spark", "Airflow"] },
+  { name: "서지민", job: "데이터분석", experience: "8년+", education: "석사 이상", region: "경기", district: "고양시", dong: "장항동", lat: 37.6584, lng: 126.7789, skills: ["ML", "Spark", "Airflow"] },
   { name: "황준호", job: "웹개발", experience: "1-3년", education: "학사", region: "대전", district: "서구", lat: 36.3553, lng: 127.3835, skills: ["React", "Node.js", "Firebase"] }
 ];
 
@@ -33,6 +33,14 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 }).addTo(map);
 
 const circleLayerGroup = L.layerGroup().addTo(map);
+
+function formatAddressArea(person) {
+  if (person.district.endsWith("시") && person.dong) {
+    return `${person.district} ${person.dong}`;
+  }
+
+  return person.district;
+}
 
 function filterJobseekers() {
   const keyword = keywordEl.value.trim().toLowerCase();
@@ -61,10 +69,11 @@ function renderList(items) {
   listEl.innerHTML = items
     .map((person) => {
       const tags = person.skills.map((skill) => `<span class="tag">${skill}</span>`).join("");
+      const addressArea = formatAddressArea(person);
       return `
         <article class="talent-card">
           <h3>${person.name} <small>(${person.job})</small></h3>
-          <p class="meta">주소지: ${person.district} · ${person.experience} · ${person.education}</p>
+          <p class="meta">주소지: ${addressArea} · ${person.experience} · ${person.education}</p>
           <div class="stack">${tags}</div>
         </article>
       `;
@@ -76,11 +85,12 @@ function groupByLocation(items) {
   const grouped = new Map();
 
   items.forEach((person) => {
-    const key = `${person.region}-${person.district}`;
+    const area = formatAddressArea(person);
+    const key = `${person.region}-${area}`;
     if (!grouped.has(key)) {
       grouped.set(key, {
         region: person.region,
-        district: person.district,
+        area,
         lat: person.lat,
         lng: person.lng,
         members: []
@@ -107,7 +117,7 @@ function renderMap(items) {
     .slice()
     .sort((a, b) => b.members.length - a.members.length)
     .slice(0, 3)
-    .map((group) => `${group.region} ${group.district} ${group.members.length}명`)
+    .map((group) => `${group.region} ${group.area} ${group.members.length}명`)
     .join(" / ");
 
   regionSummaryEl.textContent = `상위 밀집 지역: ${summary}`;
@@ -129,7 +139,7 @@ function renderMap(items) {
     const names = group.members.map((member) => member.name).join(", ");
     circle.bindPopup(`
       <div class="map-popup">
-        <h4>${group.region} ${group.district}</h4>
+        <h4>${group.region} ${group.area}</h4>
         <p>구직자 ${count}명</p>
         <p>인원: ${names}</p>
       </div>
@@ -138,7 +148,7 @@ function renderMap(items) {
     circle.addTo(circleLayerGroup);
 
     const marker = L.marker([group.lat, group.lng])
-      .bindTooltip(`${group.region} ${group.district} · ${count}명`, {
+      .bindTooltip(`${group.region} ${group.area} · ${count}명`, {
         direction: "top",
         offset: [0, -8]
       })
