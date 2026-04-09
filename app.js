@@ -2,8 +2,8 @@
   { name: "김민수", job: "백엔드", experience: "4-7년", education: "학사", region: "서울", district: "강남구", lat: 37.4979, lng: 127.0276, skills: ["Java", "Spring", "MySQL"] },
   { name: "박지현", job: "프론트엔드", experience: "1-3년", education: "학사", region: "서울", district: "마포구", lat: 37.5563, lng: 126.9086, skills: ["React", "TypeScript", "Figma"] },
   { name: "이도윤", job: "데이터분석", experience: "신입", education: "석사 이상", region: "서울", district: "서초구", lat: 37.4836, lng: 127.0327, skills: ["Python", "Pandas", "SQL"] },
-  { name: "최유진", job: "웹개발", experience: "8년+", education: "학사", region: "경기", district: "성남시", lat: 37.4201, lng: 127.1262, skills: ["Node.js", "AWS", "MongoDB"] },
-  { name: "정하늘", job: "백엔드", experience: "1-3년", education: "전문학사", region: "경기", district: "수원시", lat: 37.2636, lng: 127.0286, skills: ["Kotlin", "Spring", "Redis"] },
+  { name: "최유진", job: "웹개발", experience: "8년+", education: "학사", region: "경기", district: "분당구", lat: 37.3826, lng: 127.1187, skills: ["Node.js", "AWS", "MongoDB"] },
+  { name: "정하늘", job: "백엔드", experience: "1-3년", education: "전문학사", region: "경기", district: "영통구", lat: 37.2594, lng: 127.0465, skills: ["Kotlin", "Spring", "Redis"] },
   { name: "한예린", job: "디자인", experience: "4-7년", education: "학사", region: "인천", district: "연수구", lat: 37.4103, lng: 126.6788, skills: ["UX", "UI", "Prototyping"] },
   { name: "윤태경", job: "프론트엔드", experience: "4-7년", education: "학사", region: "인천", district: "부평구", lat: 37.5071, lng: 126.7218, skills: ["Vue", "Nuxt", "Pinia"] },
   { name: "오지후", job: "데이터분석", experience: "1-3년", education: "학사", region: "대전", district: "유성구", lat: 36.3622, lng: 127.3568, skills: ["R", "Python", "Tableau"] },
@@ -12,7 +12,7 @@
   { name: "노서연", job: "프론트엔드", experience: "1-3년", education: "학사", region: "부산", district: "부산진구", lat: 35.1628, lng: 129.0532, skills: ["React", "Next.js", "Sass"] },
   { name: "임가은", job: "디자인", experience: "신입", education: "전문학사", region: "광주", district: "북구", lat: 35.174, lng: 126.9111, skills: ["Illustrator", "Photoshop", "Figma"] },
   { name: "권시우", job: "백엔드", experience: "4-7년", education: "학사", region: "서울", district: "송파구", lat: 37.5145, lng: 127.1059, skills: ["Python", "Django", "Docker"] },
-  { name: "서지민", job: "데이터분석", experience: "8년+", education: "석사 이상", region: "경기", district: "고양시", lat: 37.6584, lng: 126.832, skills: ["ML", "Spark", "Airflow"] },
+  { name: "서지민", job: "데이터분석", experience: "8년+", education: "석사 이상", region: "경기", district: "일산동구", lat: 37.6584, lng: 126.7789, skills: ["ML", "Spark", "Airflow"] },
   { name: "황준호", job: "웹개발", experience: "1-3년", education: "학사", region: "대전", district: "서구", lat: 36.3553, lng: 127.3835, skills: ["React", "Node.js", "Firebase"] }
 ];
 
@@ -64,7 +64,7 @@ function renderList(items) {
       return `
         <article class="talent-card">
           <h3>${person.name} <small>(${person.job})</small></h3>
-          <p class="meta">${person.region} ${person.district} · ${person.experience} · ${person.education}</p>
+          <p class="meta">주소지: ${person.district} · ${person.experience} · ${person.education}</p>
           <div class="stack">${tags}</div>
         </article>
       `;
