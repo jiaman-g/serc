@@ -221,6 +221,24 @@ button:hover {
   font-size: 0.9rem;
 }
 
+.count-pin-wrapper {
+  background: transparent;
+  border: none;
+}
+
+.count-pin {
+  min-width: 52px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #fff;
+  background: #124533;
+  border: 2px solid #d4f0e2;
+  box-shadow: 0 5px 12px rgba(18, 69, 51, 0.22);
+}
+
 @media (max-width: 1080px) {
   .filters {
     grid-template-columns: repeat(3, minmax(0, 1fr));

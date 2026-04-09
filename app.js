@@ -147,10 +147,17 @@ function renderMap(items) {
 
     circle.addTo(circleLayerGroup);
 
-    const marker = L.marker([group.lat, group.lng])
-      .bindTooltip(`${group.region} ${group.area} · ${count}명`, {
+    const countIcon = L.divIcon({
+      className: "count-pin-wrapper",
+      html: `<div class="count-pin">${count}명</div>`,
+      iconSize: [52, 28],
+      iconAnchor: [26, 14]
+    });
+
+    const marker = L.marker([group.lat, group.lng], { icon: countIcon })
+      .bindTooltip(`${group.region} ${group.area}`, {
         direction: "top",
-        offset: [0, -8]
+        offset: [0, -18]
       })
       .addTo(circleLayerGroup);
 
